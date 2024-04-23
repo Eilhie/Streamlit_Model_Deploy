@@ -22,13 +22,6 @@ def main():
     is_active_member = st.selectbox("Is Active Member? (Yes/No)", ["Yes", "No"])
     estimated_salary = st.number_input("Estimated Salary:")
 
-    # Check for missing input (optional)
-    if st.button("Submit User Information"):
-        all_filled = credit_score and geography and gender and age and tenure and balance and num_of_products and has_cr_card and is_active_member and estimated_salary
-        if not all_filled:
-            st.error("Please fill in all fields before submitting.")
-            return
-
     # Preprocessing for categorical features (assuming One-Hot Encoding)
     # categorical_features = ["Geography", "HasCrCard", "IsActiveMember"]
     # encoder = OneHotEncoder(sparse=False)  # Set sparse=False for easier handling
@@ -55,26 +48,31 @@ def main():
             encoder = pickle.load(encoder_file)
         return scalers, encoder
 
-    # Load the scalers and encoder
-    scalers, encoder = load_scalers_encoder()
-
-    categorical = ['Geography', 'Gender']
-    conti = ['CreditScore', 'Balance', 'EstimatedSalary']
     
-    user_data_subset = user_data[categorical]
-    user_data_encoded = pd.DataFrame(encoder.transform(user_data_subset).toarray(), columns=encoder.get_feature_names_out(categorical))
-    user_data = user_data.reset_index(drop=True)
-    user_data = pd.concat([user_data, user_data_encoded], axis=1)
-    user_data.drop(categorical, axis=1, inplace=True)
-
-
-    # scaler
-    user_data[conti] = scalers.transform(user_data[conti])
 
     # print(user_data.columns)
 
     # Make prediction button with a loading indicator
     if st.button("Predict Churn Risk"):
+        all_filled = credit_score and geography and gender and age and tenure and balance and num_of_products and has_cr_card and is_active_member and estimated_salary
+        if not all_filled:
+            st.error("Please fill in all fields before submitting.")
+            return
+        # Load the scalers and encoder
+        scalers, encoder = load_scalers_encoder()
+
+        categorical = ['Geography', 'Gender']
+        conti = ['CreditScore', 'Balance', 'EstimatedSalary']
+        
+        user_data_subset = user_data[categorical]
+        user_data_encoded = pd.DataFrame(encoder.transform(user_data_subset).toarray(), columns=encoder.get_feature_names_out(categorical))
+        user_data = user_data.reset_index(drop=True)
+        user_data = pd.concat([user_data, user_data_encoded], axis=1)
+        user_data.drop(categorical, axis=1, inplace=True)
+
+
+        # scaler
+        user_data[conti] = scalers.transform(user_data[conti])
         with st.spinner("Making prediction..."):
             # Load the pickled model from its saved location
             with open("finalized_model.pkl", "rb") as model_file:
@@ -88,6 +86,6 @@ def main():
                 st.write("Predicted: **CHURNk**")
             else:
                 st.write("Predicted: **NOT CHURN**")
-                
+
 if __name__ == "__main__":
     main()
