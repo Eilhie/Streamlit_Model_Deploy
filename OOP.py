@@ -8,9 +8,9 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import OneHotEncoder
 import statistics
-from sklearn.tree import DecisionTreeClassifier
 import pickle
 from sklearn.preprocessing import MinMaxScaler
+from xgboost import XGBClassifier
 
 class DataHandler:
     def __init__(self, file_path):
@@ -86,15 +86,18 @@ class ModelHandler:
         with open(path, "wb") as scaler_file:
             pickle.dump(scaler, scaler_file)
     
-    def load_model(self, path):
-        with open(path, "rb") as model_file:
-            self.model = pickle.load(model_file)  # Assuming model is pickled
+    def createModel(self):
+        self.model = XGBClassifier(n_estimators=100, max_depth=5)
+
+    def train(self):
+        self.model.fit(self.x_train, self.y_train)
 
     def predict(self):
-        if self.model is not None:
-            self.y_predict = self.model.predict(self.x_test)
-        else:
-            raise Exception("Model not loaded. Please call load_model() first.")
+        self.y_predict =  self.model.predict(self.x_test)
+
+    def pickle_dump(self, filename='finalized_model.pkl'):
+        with open(filename, 'wb') as file:
+            pickle.dump(self.model, file)
         
     def createReport(self):
         print('\nClassification Report\n')
@@ -126,7 +129,8 @@ model_handler.split_data()
 model_handler.OHE(['Geography', 'Gender'])
 model_handler.MinMaxScaler(['CreditScore', 'Balance', 'EstimatedSalary'])
 
-model_handler.load_model("finalized_model.pkl")
+model_handler.createModel()
+model_handler.train()
 model_handler.predict()
 print("Model Accuracy:", model_handler.evaluate_model())
 model_handler.createReport()
