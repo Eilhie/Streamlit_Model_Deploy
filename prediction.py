@@ -83,7 +83,7 @@ def main():
 
             # Display prediction with clear interpretation
             if prediction == 1:
-                st.write("Predicted: **CHURNk**")
+                st.write("Predicted: **CHURN**")
             else:
                 st.write("Predicted: **NOT CHURN**")
 
