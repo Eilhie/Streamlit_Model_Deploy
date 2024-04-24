@@ -87,7 +87,13 @@ class ModelHandler:
             pickle.dump(scaler, scaler_file)
     
     def createModel(self):
-        self.model = XGBClassifier(n_estimators=100, max_depth=5)
+        self.model = XGBClassifier(
+    n_estimators=150,
+    max_depth=7,
+    learning_rate=0.1,
+    gamma=0.4,
+    colsample_bytree=0.8
+    )
 
     def train(self):
         self.model.fit(self.x_train, self.y_train)
